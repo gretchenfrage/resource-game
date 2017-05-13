@@ -59,8 +59,10 @@ public abstract class WorldContinuum<W extends World<W>> {
         } else {
             while (targetTime < time) {
                 List<WorldMutator<W>> toUnapply = appliedMutators.remove(time);
-                for (int i = toUnapply.size() - 1; i >= 0; i--) {
-                    toUnapply.get(i).unapply(world);
+                if (toUnapply != null) {
+                    for (int i = toUnapply.size() - 1; i >= 0; i--) {
+                        toUnapply.get(i).unapply(world);
+                    }
                 }
                 time--;
             }

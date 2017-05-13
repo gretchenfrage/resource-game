@@ -5,7 +5,7 @@
  * create a multiplayer game while minimizing network usage and boilerplate needed.
  * </p>
  * <p>
- * To create a game using this package, the classes World and Server must be reified (given full implementations).
+ * To create a game using this package, the classes World, Game, and Server must be reified (given full implementations).
  * Giving these classes meaningful implementations will also involve implementing WorldMutator, ExternalWorldMutator,
  * ClientView, and ClientController, probably multiple times. While the Server class is completely ready to accept
  * ClientState connections as soon as it's started, the ClientState must be fed a network and server proxy that have
