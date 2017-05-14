@@ -17,24 +17,25 @@ import java.util.function.Supplier;
 /**
  * A server that can be connected to by a ClientState.
  */
-public abstract class Server<W extends World<W>> implements RemoteServer<W>, Runnable  {
+public abstract class Server<W extends World<W, C, S, RS>, C extends ClientState<W, C, S, RS>,
+        S extends Server<W, C, S, RS>, RS extends RemoteServer<W, C, S, RS>>
+        implements RemoteServer<W, C, S, RS>, Runnable  {
 
     private LocalNode network;
 
     private SerialCloner cloner;
 
-    private ServerWorldContinuum<W> continuum;
+    private final ServerWorldContinuum<W, C, S, RS> continuum;
 
     private long ticks;
     private long lastTickTime = -1;
-    private float tickTimeDebt = 0;
 
     public Server() throws IOException {
         network = new BasicLocalNode(getPort());
         addSerializers(network::addSerializer);
         network.listenForJoin(node -> {
             try {
-                node.send(network.makeProxy(this, RemoteServer.class));
+                node.send(createProxy(network));
             } catch (DisconnectionException e) {
                 e.printStackTrace();
             }
@@ -44,7 +45,7 @@ public abstract class Server<W extends World<W>> implements RemoteServer<W>, Run
         cloner = new SerialCloner(network.getSerializer());
 
         ticks = getStartTime();
-        continuum = new ServerWorldContinuum<W>(ticks, getStartWorldSupplier());
+        continuum = new ServerWorldContinuum<W, C, S, RS>(ticks, getStartWorldSupplier());
     }
 
     protected abstract void addSerializers(BiConsumer<Serializer, Integer> acceptor);
@@ -57,6 +58,10 @@ public abstract class Server<W extends World<W>> implements RemoteServer<W>, Run
 
     protected abstract int getTicksPerSecond();
 
+    protected abstract Proxy<RS> createProxy(LocalNode network);
+
+    protected abstract S getSelf();
+
     @Override
     public void run() {
         if (lastTickTime == -1) {
@@ -66,7 +71,7 @@ public abstract class Server<W extends World<W>> implements RemoteServer<W>, Run
             ticks++;
             // update the state
             long time = System.nanoTime();
-            tickTimeDebt = (time - lastTickTime) / 1_000_000_000.0f;
+            float tickTimeDebt = (time - lastTickTime) / 1_000_000_000.0f;
             float timePerTick = 1.0f / getTicksPerSecond();
             synchronized (continuum) {
                 while (tickTimeDebt >= timePerTick) {
@@ -91,25 +96,24 @@ public abstract class Server<W extends World<W>> implements RemoteServer<W>, Run
     }
 
     @Override
-    public void listenForExternalMutators(Proxy<Consumer<ExternalWorldMutator<W>>> listener) {
+    public void listenForExternalMutators(Proxy<Consumer<ExternalWorldMutator<W, C, S, RS>>> listener) {
         continuum.listenForExternalMutators(listener);
     }
 
-    public void provideExternalWorldMutator(ExternalWorldMutator<W> mutator) {
+    public void provideExternalWorldMutator(ExternalWorldMutator<W, C, S, RS> mutator) {
         continuum.provideExternalMutator(mutator);
     }
 
     @Override
-    public Proxy<ClientControllerReceiver<W>> createReceiver(NodeAddress client, long time) {
-        ClientController<W> controller;
+    public Proxy<ClientControllerReceiver<W, C, S, RS>> createReceiver(NodeAddress client, long time) {
+        ClientController<W, C, S, RS> controller;
         synchronized (continuum) {
             controller = continuum.getWorld(time).getController(client);
         }
-        ClientControllerReceiver<W> receiver = controller.produceReceiver();
-        receiver.bind(this);
+        ClientControllerReceiver<W, C, S, RS> receiver = controller.toReceiver(getSelf());
         return network.makeProxy(
                 receiver,
-                (Class<ClientControllerReceiver<W>>) (Object) ClientControllerReceiver.class
+                (Class<ClientControllerReceiver<W, C, S, RS>>) (Object) receiver.getRemoteInterface()
         );
     }
 

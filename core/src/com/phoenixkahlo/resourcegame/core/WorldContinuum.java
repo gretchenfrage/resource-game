@@ -10,13 +10,14 @@ import java.util.*;
  *
  * @param <W> the class of world.
  */
-public abstract class WorldContinuum<W extends World<W>> {
+public abstract class WorldContinuum<W extends World<W, C, S, RS>, C extends ClientState<W, C, S, RS>,
+        S extends Server<W, C, S, RS>, RS extends RemoteServer<W, C, S, RS>> {
 
     private W world;
     private long time;
     private long lastRevertibleTime;
-    private SortedMap<Long, List<WorldMutator<W>>> appliedMutators;
-    private SortedMap<Long, SortedSet<ExternalWorldMutator<W>>> externalMutators;
+    private SortedMap<Long, List<WorldMutator<W, C, S, RS>>> appliedMutators;
+    private SortedMap<Long, SortedSet<ExternalWorldMutator<W, C, S, RS>>> externalMutators;
     private long tickToRemember;
 
     public WorldContinuum(long tickToRemember) {
@@ -47,7 +48,7 @@ public abstract class WorldContinuum<W extends World<W>> {
      * Collect all the external mutators that have accumulated since the last invocation of this method. Perhaps a
      * client implementation would empty a buffer that it had been asynchronously filling from a server.
      */
-    protected abstract Collection<ExternalWorldMutator<W>> collectExternalMutators();
+    protected abstract Collection<ExternalWorldMutator<W, C, S, RS>> collectExternalMutators();
 
     /**
      * If the target time is less than the current time, revert to that time.
@@ -58,7 +59,7 @@ public abstract class WorldContinuum<W extends World<W>> {
             time = targetTime;
         } else {
             while (targetTime < time) {
-                List<WorldMutator<W>> toUnapply = appliedMutators.remove(time);
+                List<WorldMutator<W, C, S, RS>> toUnapply = appliedMutators.remove(time);
                 if (toUnapply != null) {
                     for (int i = toUnapply.size() - 1; i >= 0; i--) {
                         toUnapply.get(i).unapply(world);
@@ -74,11 +75,11 @@ public abstract class WorldContinuum<W extends World<W>> {
      */
     private void advance(long targetTime) {
         while (targetTime > time) {
-            List<WorldMutator<W>> toApply = new ArrayList<>();
-            SortedSet<ExternalWorldMutator<W>> externs = externalMutators.get(time + 1);
+            List<WorldMutator<W, C, S, RS>> toApply = new ArrayList<>();
+            SortedSet<ExternalWorldMutator<W, C, S, RS>> externs = externalMutators.get(time + 1);
             if (externs != null)
                 externs.stream().flatMap(ExternalWorldMutator::toWorldMutators).forEach(toApply::add);
-            world.collectMutators().forEach(toApply::add);
+            world.getMutators().forEach(toApply::add);
             int i = 0;
             while (i < toApply.size()) {
                 if (toApply.get(i).prepare(world)) {
@@ -96,9 +97,9 @@ public abstract class WorldContinuum<W extends World<W>> {
     /**
      * Add the external mutator to this continuum, reverting if necessary.
      */
-    private void addExternalMutator(ExternalWorldMutator<W> mutator) {
+    private void addExternalMutator(ExternalWorldMutator<W, C, S, RS> mutator) {
         revert(mutator.getTime() - 1);
-        SortedSet<ExternalWorldMutator<W>> set = externalMutators.get(mutator.getTime());
+        SortedSet<ExternalWorldMutator<W, C, S, RS>> set = externalMutators.get(mutator.getTime());
         if (set == null) {
             set = new TreeSet<>(Comparator.comparingLong(ExternalWorldMutator::getID));
             externalMutators.put(mutator.getTime(), set);
@@ -110,10 +111,12 @@ public abstract class WorldContinuum<W extends World<W>> {
      * Collect external mutators and add them.
      */
     private void updateExternalMutators() {
-        for (ExternalWorldMutator<W> mutator : collectExternalMutators()) {
+        for (ExternalWorldMutator<W, C, S, RS> mutator : collectExternalMutators()) {
             addExternalMutator(mutator);
         }
     }
+
+
 
     /**
      * Bring the world to this time frame, and then return it.

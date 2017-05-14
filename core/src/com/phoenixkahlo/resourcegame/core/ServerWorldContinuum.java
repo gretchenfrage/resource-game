@@ -12,13 +12,14 @@ import java.util.function.Supplier;
 /**
  * Created by Phoenix on 5/13/2017.
  */
-public class ServerWorldContinuum<W extends World<W>> extends WorldContinuum<W> {
+public class ServerWorldContinuum<W extends World<W, C, S, RS>, C extends ClientState<W, C, S, RS>,
+        S extends Server<W, C, S, RS>, RS extends RemoteServer<W, C, S, RS>> extends WorldContinuum<W, C, S, RS> {
 
     private long startTime;
     private Supplier<W> startWorldSupplier;
 
-    private Collection<ExternalWorldMutator<W>> externalMutatorCollector;
-    private List<Proxy<Consumer<ExternalWorldMutator<W>>>> externalMutatorListeners;
+    private Collection<ExternalWorldMutator<W, C, S, RS>> externalMutatorCollector;
+    private List<Proxy<Consumer<ExternalWorldMutator<W, C, S, RS>>>> externalMutatorListeners;
 
     public ServerWorldContinuum(long startTime, Supplier<W> startWorldSupplier) {
         this.startTime = startTime;
@@ -42,7 +43,7 @@ public class ServerWorldContinuum<W extends World<W>> extends WorldContinuum<W> 
     }
 
     @Override
-    protected synchronized Collection<ExternalWorldMutator<W>> collectExternalMutators() {
+    protected synchronized Collection<ExternalWorldMutator<W, C, S, RS>> collectExternalMutators() {
         try {
             return externalMutatorCollector;
         } finally {
@@ -53,14 +54,14 @@ public class ServerWorldContinuum<W extends World<W>> extends WorldContinuum<W> 
     /**
      * Asynchronously make the mutator available for collection.
      */
-    public synchronized void provideExternalMutator(ExternalWorldMutator<W> mutator) {
+    public synchronized void provideExternalMutator(ExternalWorldMutator<W, C, S, RS> mutator) {
         externalMutatorCollector.add(mutator);
-        for (Proxy<Consumer<ExternalWorldMutator<W>>> listener : externalMutatorListeners) {
+        for (Proxy<Consumer<ExternalWorldMutator<W, C, S, RS>>> listener : externalMutatorListeners) {
             listener.unblocking(false).accept(mutator);
         }
     }
 
-    public synchronized void listenForExternalMutators(Proxy<Consumer<ExternalWorldMutator<W>>> listener) {
+    public synchronized void listenForExternalMutators(Proxy<Consumer<ExternalWorldMutator<W, C, S, RS>>> listener) {
         externalMutatorListeners.add(listener);
     }
 

@@ -3,7 +3,8 @@ package com.phoenixkahlo.resourcegame.core;
 /**
  * A reversible mutator for a world.
  */
-public interface WorldMutator<W extends World<W>> {
+public interface WorldMutator<W extends World<W, C, S, RS>, C extends ClientState<W, C, S, RS>,
+        S extends Server<W, C, S, RS>, RS extends RemoteServer<W, C, S, RS>> {
 
     /**
      * Make any final captures of the world state, and return whether the mutator still wants to mutate the world.

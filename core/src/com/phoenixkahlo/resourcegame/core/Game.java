@@ -6,17 +6,17 @@ import com.badlogic.gdx.ApplicationAdapter;
  * A state based game that can be plugged into an LwjglApplication.
  * @param <G> the class of game - which should be itself.
  */
-public abstract class Game<G extends Game<G>> extends ApplicationAdapter {
+public abstract class Game extends ApplicationAdapter {
 
-    private GameState<G> state;
-    private GameState<G> nextState;
+    private GameState state;
+    private GameState nextState;
 
     private long lastRenderTime = -1;
     private float tickTimeDebt = 0;
 
-    protected abstract G getGame();
+    protected abstract Game getGame();
 
-    protected abstract GameState<G> getInitialState();
+    protected abstract GameState getInitialState();
 
     @Override
     public void create() {
@@ -34,15 +34,15 @@ public abstract class Game<G extends Game<G>> extends ApplicationAdapter {
             tickTimeDebt += (time - lastRenderTime) / 1_000_000_000.0f;
             float timePerTick = 1.0f / state.getTicksPerSecond();
             while (tickTimeDebt >= timePerTick) {
-                state.update(getGame());
+                state.update();
                 tickTimeDebt -= timePerTick;
             }
             // render the state
-            state.render(getGame());
+            state.render();
             // prepare for next tick
             lastRenderTime = time;
             if (state != nextState) {
-                state.onExit(getGame());
+                state.onExit();
                 state = nextState;
             }
         }
@@ -55,14 +55,14 @@ public abstract class Game<G extends Game<G>> extends ApplicationAdapter {
 
     @Override
     public void dispose() {
-        state.onExit(getGame());
+        state.onExit();
     }
 
-    public void setNextState(GameState<G> nextState) {
+    public void setNextState(GameState nextState) {
         this.nextState = nextState;
     }
 
-    public GameState<G> getState() {
+    public GameState getState() {
         return state;
     }
 

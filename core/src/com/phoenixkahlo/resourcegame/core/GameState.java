@@ -4,16 +4,16 @@ package com.phoenixkahlo.resourcegame.core;
  * A state within a Game.
  * @param <G> the class of Game.
  */
-public interface GameState<G extends Game<G>> {
+public interface GameState {
 
-    void render(G game);
+    void render();
 
-    void update(G game);
+    void update();
 
     int getTicksPerSecond();
 
-    void onEnter(G game);
+    void onEnter();
 
-    void onExit(G game);
+    void onExit();
 
 }

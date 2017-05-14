@@ -3,7 +3,7 @@ package com.phoenixkahlo.resourcegame.core;
 /**
  * Abstract implementation of a GameState.
  */
-public abstract class AbstractGameState<G extends Game<G>> implements GameState<G> {
+public abstract class AbstractGameState implements GameState {
 
     private int ticksPerSecond;
 
@@ -21,9 +21,9 @@ public abstract class AbstractGameState<G extends Game<G>> implements GameState<
     }
 
     @Override
-    public void onEnter(G game) {}
+    public void onEnter() {}
 
     @Override
-    public void onExit(G game) {}
+    public void onExit() {}
 
 }

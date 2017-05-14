@@ -8,14 +8,15 @@ import java.util.function.Consumer;
 /**
  * Proxy interface for the server.
  */
-public interface RemoteServer<W extends World<W>> {
+public interface RemoteServer<W extends World<W, C, S, RS>, C extends ClientState<W, C, S, RS>,
+        S extends Server<W, C, S, RS>, RS extends RemoteServer<W, C, S, RS>> {
 
     long getTime();
 
     W downloadWorld(long time);
 
-    void listenForExternalMutators(Proxy<Consumer<ExternalWorldMutator<W>>> receiver);
+    void listenForExternalMutators(Proxy<Consumer<ExternalWorldMutator<W, C, S, RS>>> receiver);
 
-    Proxy<ClientControllerReceiver<W>> createReceiver(NodeAddress client, long time);
+    Proxy<ClientControllerReceiver<W, C, S, RS>> createReceiver(NodeAddress client, long time);
 
 }
