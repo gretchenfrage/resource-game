@@ -14,8 +14,6 @@ public abstract class Game extends ApplicationAdapter {
     private long lastRenderTime = -1;
     private float tickTimeDebt = 0;
 
-    protected abstract Game getGame();
-
     protected abstract GameState getInitialState();
 
     @Override

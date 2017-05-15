@@ -23,18 +23,13 @@ public abstract class ClientState<W extends World<W, C, S, RS>, C extends Client
 
     private long time = -1;
 
-    public ClientState(LocalNode network, Proxy<RS> server,
-                       Object additionalClientData) {
+    public ClientState(LocalNode network, Proxy<RS> server) {
         this.network = network;
         this.server = server;
 
         continuum = new ClientWorldContinuum<W, C, S, RS>(server, network);
 
         multiplexer = new InputMultiplexer();
-    }
-
-    public ClientState(LocalNode network, Proxy<RS> server) {
-        this(network, server, null);
     }
 
     protected abstract C getSelf();

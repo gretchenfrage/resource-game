@@ -10,9 +10,8 @@ import com.phoenixkahlo.nodenet.serialization.Serializer;
 import com.phoenixkahlo.resourcegame.util.SerialCloner;
 
 import java.io.IOException;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.*;
+import java.util.function.*;
 
 /**
  * A server that can be connected to by a ClientState.
@@ -22,33 +21,19 @@ public abstract class Server<W extends World<W, C, S, RS>, C extends ClientState
         implements RemoteServer<W, C, S, RS>, Runnable  {
 
     private LocalNode network;
-
     private SerialCloner cloner;
-
     private final ServerWorldContinuum<W, C, S, RS> continuum;
-
-    private long ticks;
+    private volatile long ticks;
     private long lastTickTime = -1;
 
     public Server() throws IOException {
-        network = new BasicLocalNode(getPort());
-        addSerializers(network::addSerializer);
-        network.listenForJoin(node -> {
-            try {
-                node.send(createProxy(network));
-            } catch (DisconnectionException e) {
-                e.printStackTrace();
-            }
-        });
-        network.acceptAllIncoming();
-
         cloner = new SerialCloner(network.getSerializer());
 
         ticks = getStartTime();
-        continuum = new ServerWorldContinuum<W, C, S, RS>(ticks, getStartWorldSupplier());
+        continuum = new ServerWorldContinuum<>(ticks, getStartWorldSupplier());
     }
 
-    protected abstract void addSerializers(BiConsumer<Serializer, Integer> acceptor);
+    protected abstract void collectSerializerFactories(Consumer<UnaryOperator<Serializer>> collector);
 
     protected abstract int getPort();
 
@@ -64,22 +49,50 @@ public abstract class Server<W extends World<W, C, S, RS>, C extends ClientState
 
     @Override
     public void run() {
-        if (lastTickTime == -1) {
-            lastTickTime = System.nanoTime();
-        } else {
-            // update tick time
-            ticks++;
-            // update the state
-            long time = System.nanoTime();
-            float tickTimeDebt = (time - lastTickTime) / 1_000_000_000.0f;
-            float timePerTick = 1.0f / getTicksPerSecond();
-            synchronized (continuum) {
-                while (tickTimeDebt >= timePerTick) {
-                    continuum.getWorld(ticks);
-                }
+        try {
+            // create network
+            network = new BasicLocalNode(getPort());
+            // configure serialization
+            List<UnaryOperator<Serializer>> serializerFactories = new ArrayList<>();
+            collectSerializerFactories(serializerFactories::add);
+            int header = 1;
+            for (UnaryOperator<Serializer> serializerFactory : serializerFactories) {
+                Serializer serializer = serializerFactory.apply(network.getSerializer());
+                network.addSerializer(serializer, header++);
             }
-            // prepare for next tick
-            lastTickTime = time;
+            // configure network
+            network.listenForJoin(node -> {
+                // when a player joins, send them the server proxy
+                try {
+                    node.send(createProxy(network));
+                } catch (DisconnectionException e) {
+                    e.printStackTrace();
+                }
+            });
+            network.listenForLeave(node -> leave(node.getAddress()));
+            network.acceptAllIncoming();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        while (true) {
+            if (lastTickTime == -1) {
+                lastTickTime = System.nanoTime();
+            } else {
+                // update tick time
+                ticks++;
+                // update the state
+                long time = System.nanoTime();
+                float tickTimeDebt = (time - lastTickTime) / 1_000_000_000.0f;
+                float timePerTick = 1.0f / getTicksPerSecond();
+                synchronized (continuum) {
+                    while (tickTimeDebt >= timePerTick) {
+                        continuum.getWorld(ticks);
+                    }
+                }
+                // prepare for next tick
+                lastTickTime = time;
+            }
         }
     }
 
@@ -115,6 +128,24 @@ public abstract class Server<W extends World<W, C, S, RS>, C extends ClientState
                 receiver,
                 (Class<ClientControllerReceiver<W, C, S, RS>>) (Object) receiver.getRemoteInterface()
         );
+    }
+
+    @Override
+    public void join(NodeAddress address) {
+        ExternalWorldMutator<W, C, S, RS> mutator;
+        synchronized (continuum) {
+            mutator = continuum.getWorld(continuum.getCurrentTime()).onEnter(address, getTime());
+        }
+        provideExternalWorldMutator(mutator);
+    }
+
+    @Override
+    public void leave(NodeAddress address) {
+        ExternalWorldMutator<W, C, S, RS> mutator;
+        synchronized (continuum) {
+            mutator = continuum.getWorld(continuum.getCurrentTime()).onLeave(address, getTime());
+        }
+        provideExternalWorldMutator(mutator);
     }
 
 }

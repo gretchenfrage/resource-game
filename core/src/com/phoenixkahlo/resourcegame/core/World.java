@@ -15,12 +15,20 @@ public interface World<W extends World<W, C, S, RS>, C extends ClientState<W, C,
     /**
      * Collect all the WorldMutators for this tick based on predictable events.
      */
-    Stream<WorldMutator<W, C, S, RS>> getMutators();
+    Stream<? extends WorldMutator<W, C, S, RS>> getMutators();
 
     ClientController<W, C, S, RS> getController(NodeAddress client);
 
     ClientView<W, C, S, RS> getView(NodeAddress client);
 
-    void onEnter(NodeAddress address);
+    /**
+     * May be called from a different thread.
+     */
+    ExternalWorldMutator<W, C, S, RS> onEnter(NodeAddress address, long time);
+
+    /**
+     * May be called from a different thread.
+     */
+    ExternalWorldMutator<W, C, S, RS> onLeave(NodeAddress address, long time);
 
 }

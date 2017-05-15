@@ -19,4 +19,10 @@ public interface RemoteServer<W extends World<W, C, S, RS>, C extends ClientStat
 
     Proxy<ClientControllerReceiver<W, C, S, RS>> createReceiver(NodeAddress client, long time);
 
+    //TODO: make this more secure
+    void join(NodeAddress address);
+
+    //TODO: make this more secure
+    void leave(NodeAddress address);
+
 }

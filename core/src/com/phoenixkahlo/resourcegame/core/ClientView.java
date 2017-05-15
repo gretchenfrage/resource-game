@@ -6,6 +6,6 @@ package com.phoenixkahlo.resourcegame.core;
 public interface ClientView<W extends World<W, C, S, RS>, C extends ClientState<W, C, S, RS>,
         S extends Server<W, C, S, RS>, RS extends RemoteServer<W, C, S, RS>> {
 
-    void render(ClientState<W, C, S, RS> client);
+    void render(C client);
 
 }

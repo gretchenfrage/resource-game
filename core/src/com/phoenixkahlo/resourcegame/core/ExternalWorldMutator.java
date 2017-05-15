@@ -16,6 +16,6 @@ public interface ExternalWorldMutator<W extends World<W, C, S, RS>, C extends Cl
      */
     long getID();
 
-    Stream<WorldMutator<W, C, S, RS>> toWorldMutators();
+    Stream<? extends WorldMutator<W, C, S, RS>> toWorldMutators();
 
 }

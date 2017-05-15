@@ -116,7 +116,9 @@ public abstract class WorldContinuum<W extends World<W, C, S, RS>, C extends Cli
         }
     }
 
-
+    public long getCurrentTime() {
+        return time;
+    }
 
     /**
      * Bring the world to this time frame, and then return it.
