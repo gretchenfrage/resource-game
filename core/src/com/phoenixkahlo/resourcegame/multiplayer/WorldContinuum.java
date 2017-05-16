@@ -16,7 +16,7 @@ public class WorldContinuum<W extends World<W, C>, C> {
     private SortedMap<Long, Stack<ReversibleMutator<W>>> history;
     private SortedMap<Long, SortedSet<WorldInput<W, C>>> inputs;
 
-    public synchronized void launch(ContinuumLaunchPacket<W> packet) {
+    public synchronized void launch(ContinuumLaunchPacket<W, C> packet) {
         world = packet.getWorld();
         time = packet.getStartAtTime();
         history = new TreeMap<>();
@@ -75,6 +75,10 @@ public class WorldContinuum<W extends World<W, C>, C> {
     public synchronized void forget(long ticksToRemember) {
         history.headMap(time - ticksToRemember).clear();
         inputs.headMap(time - ticksToRemember).clear();
+    }
+
+    public synchronized W get() {
+        return world;
     }
 
 }

@@ -5,14 +5,14 @@ import java.util.Collection;
 /**
  * All the information needed to start or restart a world continuum
  */
-public class ContinuumLaunchPacket<W extends World<W>> {
+public class ContinuumLaunchPacket<W extends World<W, C>, C> {
 
     private W world;
-    private Collection<WorldInput<W>> inputs;
+    private Collection<WorldInput<W, C>> inputs;
     private long startAtTime;
     private long advanceToTime;
 
-    public ContinuumLaunchPacket(W world, Collection<WorldInput<W>> inputs, long startAtTime, long advanceToTime) {
+    public ContinuumLaunchPacket(W world, Collection<WorldInput<W, C>> inputs, long startAtTime, long advanceToTime) {
         this.world = world;
         this.inputs = inputs;
         this.startAtTime = startAtTime;
@@ -23,7 +23,7 @@ public class ContinuumLaunchPacket<W extends World<W>> {
         return world;
     }
 
-    public Collection<WorldInput<W>> getInputs() {
+    public Collection<WorldInput<W, C>> getInputs() {
         return inputs;
     }
 
