@@ -22,10 +22,9 @@ import java.util.function.UnaryOperator;
  * Server loop that connects to client states. When a node joins the network, this will send them the server proxy.
  * For the client to join the world, it has to call RemoteServer.joinWorld and pass a proxy of itself.
  */
-public class Server<W extends World<W, C>, C, S> implements ServerLoop, RemoteServer<W, C, S> {
+public class Server<W extends World<W, C>, C, S extends SpecializedServer> implements ServerLoop, RemoteServer<W, C, S> {
 
     private ContinuumLaunchPacket launchPacket;
-    private Consumer<LocalNode> serializerConfigurator;
     private int port;
 
     private S specializedServer;
@@ -36,10 +35,8 @@ public class Server<W extends World<W, C>, C, S> implements ServerLoop, RemoteSe
     private Collection<Proxy<RemoteClient<W, C, S>>> clients = Collections.synchronizedCollection(new ArrayList<>());
     private SerialCloner cloner;
 
-    public Server(ContinuumLaunchPacket launchPacket, Consumer<LocalNode> serializerConfigurator, int port,
-                  S specializedServer) {
+    public Server(ContinuumLaunchPacket launchPacket, int port, S specializedServer) {
         this.launchPacket = launchPacket;
-        this.serializerConfigurator = serializerConfigurator;
         this.port = port;
         this.specializedServer = specializedServer;
     }
@@ -49,7 +46,7 @@ public class Server<W extends World<W, C>, C, S> implements ServerLoop, RemoteSe
         // set up the network
         network = new BasicLocalNode(port);
         // set up serializers
-        serializerConfigurator.accept(network);
+        specializedServer.initializeSerialization(network);
         // set up serial cloner
         cloner = new SerialCloner(network.getSerializer());
         // when a node joins, send them the server proxy
@@ -60,7 +57,7 @@ public class Server<W extends World<W, C>, C, S> implements ServerLoop, RemoteSe
                 e.printStackTrace();
             }
         });
-        // when a node leaves, apply a leave event
+        // when a node leaves, apply a leave event, and remove from the clients collection
         network.listenForLeave(node -> {
             clients.removeIf(proxy -> proxy.getSource().equals(node.getAddress()));
             synchronized (continuum) {
@@ -73,7 +70,28 @@ public class Server<W extends World<W, C>, C, S> implements ServerLoop, RemoteSe
 
     @Override
     public void update() {
-
+        // update time
+        time++;
+        synchronized (continuum) {
+            // apply world inputs
+            while (worldInputBuffer.size() > 0) {
+                WorldInput<W, C> input = worldInputBuffer.remove();
+                try {
+                    // apply the input
+                    continuum.applyInput(input);
+                    // send to clients
+                    clients.forEach(client -> client.unblocking(false).provideInput(input));
+                } catch (ForgottenHistoryException e) {
+                    // log the exception and resume
+                    System.err.println("failed to apply input: " + input);
+                    e.printStackTrace();
+                }
+            }
+            // update continuum
+            continuum.advance(time);
+            // prune continuum
+            continuum.forget(1000);
+        }
     }
 
     @Override
@@ -84,9 +102,11 @@ public class Server<W extends World<W, C>, C, S> implements ServerLoop, RemoteSe
     @Override
     public void joinWorld(Proxy<RemoteClient<W, C, S>> client) {
         clients.add(client);
+        WorldInput<W, C> handler;
         synchronized (continuum) {
-            provideInput(continuum.get().handleEnter(client.getSource()));
+            handler = continuum.get().handleEnter(client.getSource());
         }
+        provideInput(handler);
     }
 
     @Override

@@ -5,7 +5,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 /**
  * A state based game that can be plugged into an LwjglApplication.
  */
-public abstract class Game extends ApplicationAdapter {
+public class Game extends ApplicationAdapter {
 
     private GameState state;
     private GameState nextState;
@@ -13,11 +13,8 @@ public abstract class Game extends ApplicationAdapter {
     private long lastRenderTime = -1;
     private float tickTimeDebt = 0;
 
-    protected abstract GameState getInitialState();
-
-    @Override
-    public void create() {
-        state = getInitialState();
+    public Game(GameState initialState) {
+        state = initialState;
         setNextState(state);
     }
 
@@ -25,6 +22,7 @@ public abstract class Game extends ApplicationAdapter {
     public void render() {
         if (lastRenderTime == -1) {
             lastRenderTime = System.nanoTime();
+            state.onEnter();
         } else {
             // update the state
             long time = System.nanoTime();
@@ -41,6 +39,7 @@ public abstract class Game extends ApplicationAdapter {
             if (state != nextState) {
                 state.onExit();
                 state = nextState;
+                state.onEnter();
             }
         }
     }

@@ -42,6 +42,11 @@ public class ClientState<W extends World<W, C>, C, S> implements GameState, Remo
         interactor = continuum.get().getInteractor(network.getAddress());
         // set up the continuum and time
         setupContinuumAndTime();
+        // join the world
+        server.blocking().joinWorld(network.makeProxy(
+                this,
+                (Class<RemoteClient<W, C, S>>) (Object) RemoteClient.class)
+        );
     }
 
     private void setupContinuumAndTime() {
