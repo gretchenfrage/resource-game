@@ -8,18 +8,21 @@ import com.phoenixkahlo.resourcegame.util.ProxyFactory;
  * An object that, when activated on a client's machine, handles the
  * input and rendering of that client. This interface extends InputProcessor,
  * but the client guarentees that the methods inherited from InputProcessor
- * will only be called while the interactor is activated. If the interactor
+ * will only be called while the interactor is active. If the interactor
  * wishes to do input querying, it can do so in the render method.
  */
-public interface WorldInteractor<W extends World<W>> extends InputProcessor {
+public interface WorldInteractor<W extends World<W, C>, C> extends InputProcessor {
 
-    void onActivate(/*TODO: param*/);
+    void onActivate();
 
-    void onDeactivate(/*TODO: param*/);
+    void onDeactivate();
 
-    void render(W world/*TODO: param*/);
+    void render(W world, C specializedClient);
 
-    Proxy<?> makeReceiver(ProxyFactory proxyFactory/*TODO: param*/);
+    /**
+     * Create the receiver proxy that will be used to receive methods of
+     */
+    Proxy<?> makeReceiver(ProxyFactory proxyFactory);
 
     /**
      * After the client updates the world, it will check for

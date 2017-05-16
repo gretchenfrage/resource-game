@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 /**
  * World that will be synchronized accross client and server.
  */
-public interface World<W extends World<W>> {
+public interface World<W extends World<W, C>, C> {
 
     /**
      * Stream the collection of reversible mutators that will advance
@@ -15,16 +15,16 @@ public interface World<W extends World<W>> {
      */
     Stream<? extends ReversibleMutator<W>> update();
 
-    WorldInteractor<W> getInteractor(NodeAddress client);
+    WorldInteractor<W, C> getInteractor(NodeAddress client);
 
     /**
      * Get the world input that handles the entrance of a client.
      */
-    WorldInput<W> handleEnter(/*TODO: client*/);
+    WorldInput<W> handleEnter();
 
     /**
      * Get the world input that handles the exit of a client.
      */
-    WorldInput<W> handleLeave(/*TODO: client*/);
+    WorldInput<W> handleLeave();
 
 }

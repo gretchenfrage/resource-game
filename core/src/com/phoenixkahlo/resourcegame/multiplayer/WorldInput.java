@@ -4,10 +4,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 /**
- * Represents external input into a world, which propagates itself into
- * the world through the production of mutators.
+ * Represents external input into a world, which propagates itself into the world through the production of mutators.
  */
-public abstract class WorldInput<W extends World<W>> {
+public abstract class WorldInput<W extends World<W, C>, C> {
 
     private long time;
     private long id;

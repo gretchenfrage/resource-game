@@ -1,4 +1,4 @@
-package com.phoenixkahlo.resourcegame.multiplayer;
+package com.phoenixkahlo.resourcegame.util;
 
 import com.badlogic.gdx.InputProcessor;
 

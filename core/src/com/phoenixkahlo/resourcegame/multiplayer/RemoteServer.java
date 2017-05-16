@@ -7,17 +7,6 @@ import java.util.Collection;
  */
 public interface RemoteServer<W extends World<W>, C, S> {
 
-    /**
-     * Get the current world time.
-     */
-    long getTime();
-
-    /**
-     * Get the world state at that time.
-     */
-    W getWorld(long targetTime);
-
-
-    Collection<WorldInput<W>> getInputs(long fromTime, long toTime);
+    ContinuumLaunchPacket<W> getLaunchPacket();
 
 }

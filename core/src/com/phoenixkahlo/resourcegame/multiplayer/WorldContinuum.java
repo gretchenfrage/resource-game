@@ -9,20 +9,20 @@ import java.util.stream.Stream;
  * WorldInputs at a point in time. All events that are said to occur at a point in time, occur after the tick said to be
  * that point in time, not before.
  */
-public class WorldContinuum<W extends World<W>> {
+public class WorldContinuum<W extends World<W, C>, C> {
 
     private W world;
     private long time;
     private SortedMap<Long, Stack<ReversibleMutator<W>>> history;
-    private SortedMap<Long, SortedSet<WorldInput<W>>> inputs;
+    private SortedMap<Long, SortedSet<WorldInput<W, C>>> inputs;
 
     public synchronized void launch(ContinuumLaunchPacket<W> packet) {
         world = packet.getWorld();
         time = packet.getStartAtTime();
         history = new TreeMap<>();
         inputs = new TreeMap<>();
-        for (WorldInput<W> input : packet.getInputs()) {
-            SortedSet<WorldInput<W>> set = inputs.get(input.getTime());
+        for (WorldInput<W, C> input : packet.getInputs()) {
+            SortedSet<WorldInput<W, C>> set = inputs.get(input.getTime());
             if (set == null) {
                 set = new TreeSet<>(Comparator.comparingLong(WorldInput::getID));
                 inputs.put(input.getTime(), set);
@@ -62,9 +62,9 @@ public class WorldContinuum<W extends World<W>> {
         }
     }
 
-    public synchronized void applyInput(WorldInput<W> input) throws ForgottenHistoryException {
+    public synchronized void applyInput(WorldInput<W, C> input) throws ForgottenHistoryException {
         revert(input.getTime());
-        SortedSet<WorldInput<W>> set = inputs.get(input.getTime());
+        SortedSet<WorldInput<W, C>> set = inputs.get(input.getTime());
         if (set == null) {
             set = new TreeSet<>(Comparator.comparingLong(WorldInput::getID));
             inputs.put(input.getTime(), set);
