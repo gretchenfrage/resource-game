@@ -57,7 +57,7 @@ public class Server<W extends World<W, C>, C, S extends GameServer<W, C, S>> imp
         network.listenForLeave(node -> {
             clients.removeIf(proxy -> proxy.getSource().equals(node.getAddress()));
             synchronized (continuum) {
-                provideInput(continuum.get().handleLeave(node.getAddress()));
+                provideInput(continuum.get().handleLeave(node.getAddress(), time));
             }
         });
         // set up the continuum and time
@@ -113,7 +113,7 @@ public class Server<W extends World<W, C>, C, S extends GameServer<W, C, S>> imp
         clients.add(client);
         WorldInput<W, C> handler;
         synchronized (continuum) {
-            handler = continuum.get().handleEnter(client.getSource());
+            handler = continuum.get().handleEnter(client.getSource(), time);
         }
         provideInput(handler);
     }

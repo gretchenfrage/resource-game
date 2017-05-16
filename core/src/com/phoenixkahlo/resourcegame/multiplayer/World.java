@@ -20,11 +20,11 @@ public interface World<W extends World<W, C>, C> {
     /**
      * Get the world input that handles the entrance of a client.
      */
-    WorldInput<W, C> handleEnter(NodeAddress client);
+    WorldInput<W, C> handleEnter(NodeAddress client, long time);
 
     /**
      * Get the world input that handles the exit of a client.
      */
-    WorldInput<W, C> handleLeave(NodeAddress client);
+    WorldInput<W, C> handleLeave(NodeAddress client, long time);
 
 }

@@ -36,7 +36,7 @@ public class ClientState<W extends World<W, C>, C extends GameClient<W, C, S>, S
 
     @Override
     public void onEnter() {
-        // set up user input buffer and interactor
+        // set up user input buffer and getInteractor
         userInputBuffer = new InputBufferer();
         Gdx.input.setInputProcessor(userInputBuffer.processor());
         interactor = continuum.get().getInteractor(network.getAddress());

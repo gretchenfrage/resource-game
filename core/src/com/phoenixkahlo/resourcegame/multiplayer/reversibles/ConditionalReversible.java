@@ -1,0 +1,34 @@
+package com.phoenixkahlo.resourcegame.multiplayer.reversibles;
+
+import com.phoenixkahlo.resourcegame.multiplayer.ReversibleMutator;
+
+import java.util.function.Predicate;
+
+/**
+ * Created by Phoenix on 5/16/2017.
+ */
+public class ConditionalReversible<E> implements ReversibleMutator<E> {
+
+    private Predicate<E> condition;
+    private ReversibleMutator<E> mutator;
+
+    private boolean applied;
+
+    public ConditionalReversible(Predicate<E> condition, ReversibleMutator<E> mutator) {
+        this.condition = condition;
+        this.mutator = mutator;
+    }
+
+    @Override
+    public void apply(E obj) {
+        applied = condition.test(obj);
+        if (applied)
+            mutator.apply(obj);
+    }
+
+    @Override
+    public void unapply(E obj) {
+        if (applied)
+            mutator.unapply(obj);
+    }
+}
