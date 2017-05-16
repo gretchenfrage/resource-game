@@ -3,11 +3,10 @@ package com.phoenixkahlo.resourcegame.coretest;
 import com.phoenixkahlo.nodenet.LocalNode;
 import com.phoenixkahlo.nodenet.proxy.Proxy;
 import com.phoenixkahlo.nodenet.serialization.Serializer;
-import com.phoenixkahlo.resourcegame.core.Server;
+import com.phoenixkahlo.resourcegame.coreold.Server;
 
 import java.io.IOException;
 import java.util.Scanner;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;

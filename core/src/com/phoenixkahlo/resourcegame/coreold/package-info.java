@@ -17,4 +17,4 @@
  * for a main menu.
  * </p>
  */
-package com.phoenixkahlo.resourcegame.core;
+package com.phoenixkahlo.resourcegame.coreold;

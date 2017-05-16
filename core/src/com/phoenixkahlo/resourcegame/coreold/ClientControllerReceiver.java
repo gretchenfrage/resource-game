@@ -1,4 +1,4 @@
-package com.phoenixkahlo.resourcegame.core;
+package com.phoenixkahlo.resourcegame.coreold;
 
 /**
  * Created by Phoenix on 5/13/2017.

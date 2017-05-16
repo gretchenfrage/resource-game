@@ -1,4 +1,4 @@
-package com.phoenixkahlo.resourcegame.core;
+package com.phoenixkahlo.resourcegame.coreold;
 
 import java.util.*;
 
@@ -43,6 +43,8 @@ public abstract class WorldContinuum<W extends World<W, C, S, RS>, C extends Cli
      * would download this from a server.
      */
     protected abstract W downloadWorld(long time) throws NoSuchElementException;
+
+    protected abstract Collection<ExternalWorldMutator<W, C, S, RS>> downloadExternalMutators(long fromTime, long toTime);
 
     /**
      * Collect all the external mutators that have accumulated since the last invocation of this method. Perhaps a

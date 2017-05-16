@@ -1,4 +1,4 @@
-package com.phoenixkahlo.resourcegame.core;
+package com.phoenixkahlo.resourcegame.coreold;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
@@ -59,7 +59,7 @@ public abstract class ClientState<W extends World<W, C, S, RS>, C extends Client
 
     @Override
     public void render() {
-        continuum.getWorld(time).getView(network.getAddress()).render(this);
+        continuum.getWorld(time).getView(network.getAddress()).render(getSelf());
     }
 
     @Override

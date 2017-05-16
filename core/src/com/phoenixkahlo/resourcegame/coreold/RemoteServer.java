@@ -1,4 +1,4 @@
-package com.phoenixkahlo.resourcegame.core;
+package com.phoenixkahlo.resourcegame.coreold;
 
 import com.phoenixkahlo.nodenet.NodeAddress;
 import com.phoenixkahlo.nodenet.proxy.Proxy;

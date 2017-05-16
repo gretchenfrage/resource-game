@@ -1,4 +1,6 @@
-package com.phoenixkahlo.resourcegame.core;
+package com.phoenixkahlo.resourcegame.coreold;
+
+import com.phoenixkahlo.resourcegame.core.GameState;
 
 /**
  * Abstract implementation of a GameState.

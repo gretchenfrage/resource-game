@@ -1,4 +1,4 @@
-package com.phoenixkahlo.resourcegame.core;
+package com.phoenixkahlo.resourcegame.coreold;
 
 /**
  * A reversible mutator for a world.

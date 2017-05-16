@@ -1,4 +1,4 @@
-package com.phoenixkahlo.resourcegame.core;
+package com.phoenixkahlo.resourcegame.coreold;
 
 import com.badlogic.gdx.InputProcessor;
 import com.phoenixkahlo.nodenet.proxy.Proxy;

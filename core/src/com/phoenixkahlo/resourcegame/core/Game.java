@@ -4,7 +4,6 @@ import com.badlogic.gdx.ApplicationAdapter;
 
 /**
  * A state based game that can be plugged into an LwjglApplication.
- * @param <G> the class of game - which should be itself.
  */
 public abstract class Game extends ApplicationAdapter {
 

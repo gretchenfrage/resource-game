@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.phoenixkahlo.nodenet.NodeAddress;
 import com.phoenixkahlo.nodenet.serialization.FieldSerializer;
 import com.phoenixkahlo.nodenet.serialization.Serializer;
-import com.phoenixkahlo.resourcegame.core.World;
+import com.phoenixkahlo.resourcegame.coreold.World;
 import com.phoenixkahlo.resourcegame.coretest.externmutators.PlayerEnter;
 import com.phoenixkahlo.resourcegame.coretest.externmutators.PlayerLeave;
 import com.phoenixkahlo.resourcegame.coretest.reifications.CoreTestClientController;
@@ -14,7 +14,6 @@ import com.phoenixkahlo.resourcegame.coretest.reifications.CoreTestWorldMutator;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 /**

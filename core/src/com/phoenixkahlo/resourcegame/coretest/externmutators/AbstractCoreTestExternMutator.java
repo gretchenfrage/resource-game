@@ -1,10 +1,5 @@
 package com.phoenixkahlo.resourcegame.coretest.externmutators;
 
-import com.phoenixkahlo.resourcegame.core.WorldMutator;
-import com.phoenixkahlo.resourcegame.coretest.CoreTestClientState;
-import com.phoenixkahlo.resourcegame.coretest.CoreTestRemoteServer;
-import com.phoenixkahlo.resourcegame.coretest.CoreTestServer;
-import com.phoenixkahlo.resourcegame.coretest.CoreTestWorld;
 import com.phoenixkahlo.resourcegame.coretest.reifications.CoreTestExternalWorldMutator;
 import com.phoenixkahlo.resourcegame.coretest.reifications.CoreTestWorldMutator;
 

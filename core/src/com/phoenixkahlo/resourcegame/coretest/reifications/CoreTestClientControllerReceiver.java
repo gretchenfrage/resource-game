@@ -1,6 +1,6 @@
 package com.phoenixkahlo.resourcegame.coretest.reifications;
 
-import com.phoenixkahlo.resourcegame.core.ClientControllerReceiver;
+import com.phoenixkahlo.resourcegame.coreold.ClientControllerReceiver;
 import com.phoenixkahlo.resourcegame.coretest.CoreTestClientState;
 import com.phoenixkahlo.resourcegame.coretest.CoreTestRemoteServer;
 import com.phoenixkahlo.resourcegame.coretest.CoreTestServer;
