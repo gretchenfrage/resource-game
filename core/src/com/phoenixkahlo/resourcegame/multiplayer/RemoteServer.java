@@ -22,4 +22,6 @@ public interface RemoteServer<W extends World<W, C>, C, S> {
 
     void joinWorld(Proxy<RemoteClient<W, C, S>> client);
 
+    Proxy<S> getGameServer();
+
 }

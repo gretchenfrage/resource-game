@@ -15,11 +15,11 @@ import java.util.concurrent.LinkedBlockingQueue;
  * specialized client. The network's serializer should already have been set up, in the same configuration as
  * done by the serializer configurator provided to the server.
  */
-public class ClientState<W extends World<W, C>, C, S> implements GameState, RemoteClient<W, C, S> {
+public class ClientState<W extends World<W, C>, C extends GameClient<W, C, S>, S> implements GameState, RemoteClient<W, C, S> {
 
     private final LocalNode network;
     private final Proxy<RemoteServer<W, C, S>> server;
-    private final C specializedClient;
+    private final C gameClient;
 
     private long time;
     private WorldContinuum<W, C> continuum;
@@ -28,10 +28,10 @@ public class ClientState<W extends World<W, C>, C, S> implements GameState, Remo
 
     private BlockingQueue<WorldInput<W, C>> worldInputBuffer = new LinkedBlockingQueue<>();
 
-    public ClientState(LocalNode network, Proxy<RemoteServer<W, C, S>> server, C specializedClient) {
+    public ClientState(LocalNode network, Proxy<RemoteServer<W, C, S>> server, C gameClient) {
         this.network = network;
         this.server = server;
-        this.specializedClient = specializedClient;
+        this.gameClient = gameClient;
     }
 
     @Override
@@ -42,6 +42,9 @@ public class ClientState<W extends World<W, C>, C, S> implements GameState, Remo
         interactor = continuum.get().getInteractor(network.getAddress());
         // set up the continuum and time
         setupContinuumAndTime();
+        // set up game client
+        Proxy<S> gameServer = server.blocking().getGameServer();
+        gameClient.onStart(gameServer);
         // join the world
         server.blocking().joinWorld(network.makeProxy(
                 this,
@@ -64,6 +67,7 @@ public class ClientState<W extends World<W, C>, C, S> implements GameState, Remo
     public void update() {
         // update time
         time++;
+        // handle continuum
         try {
             // apply world inputs
             while (worldInputBuffer.size() > 0)
@@ -77,6 +81,7 @@ public class ClientState<W extends World<W, C>, C, S> implements GameState, Remo
             e.printStackTrace();
             setupContinuumAndTime();
         }
+        // handle interactors
         if (continuum.get().getInteractor(network.getAddress()).equals(interactor)) {
             // if the interactors are unchanged, let it handle user input
             userInputBuffer.flush(interactor);
@@ -87,13 +92,15 @@ public class ClientState<W extends World<W, C>, C, S> implements GameState, Remo
             interactor.onDeactivate();
             interactor = continuum.get().getInteractor(network.getAddress());
             Proxy<?> receiver = server.blocking().makeReceiver(network.getAddress(), interactor.getClass());
-            interactor.onActivate(receiver);
+            interactor.onActivate(receiver, gameClient);
         }
+        // update game logic
+        gameClient.update();
     }
 
     @Override
     public void render() {
-        interactor.render(continuum.get(), specializedClient);
+        interactor.render(continuum.get(), gameClient);
     }
 
     /**
@@ -102,6 +109,11 @@ public class ClientState<W extends World<W, C>, C, S> implements GameState, Remo
     @Override
     public void provideInput(WorldInput<W, C> input) {
         worldInputBuffer.add(input);
+    }
+
+    @Override
+    public Proxy<C> getGameClient() {
+        return network.makeProxy(gameClient, gameClient.getRemoteInterface());
     }
 
     @Override

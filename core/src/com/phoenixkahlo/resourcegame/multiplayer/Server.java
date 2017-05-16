@@ -5,7 +5,6 @@ import com.phoenixkahlo.nodenet.DisconnectionException;
 import com.phoenixkahlo.nodenet.LocalNode;
 import com.phoenixkahlo.nodenet.NodeAddress;
 import com.phoenixkahlo.nodenet.proxy.Proxy;
-import com.phoenixkahlo.nodenet.serialization.Serializer;
 import com.phoenixkahlo.resourcegame.core.ServerLoop;
 import com.phoenixkahlo.resourcegame.util.SerialCloner;
 
@@ -15,19 +14,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * Server loop that connects to client states. When a node joins the network, this will send them the server proxy.
  * For the client to join the world, it has to call RemoteServer.joinWorld and pass a proxy of itself.
  */
-public class Server<W extends World<W, C>, C, S extends SpecializedServer> implements ServerLoop, RemoteServer<W, C, S> {
+public class Server<W extends World<W, C>, C, S extends GameServer<W, C, S>> implements ServerLoop, RemoteServer<W, C, S> {
 
-    private ContinuumLaunchPacket launchPacket;
-    private int port;
+    private final int port;
 
-    private S specializedServer;
+    private S gameServer;
     private LocalNode network;
     private WorldContinuum<W, C> continuum; // synchronize usages
     private volatile long time;
@@ -35,10 +32,9 @@ public class Server<W extends World<W, C>, C, S extends SpecializedServer> imple
     private Collection<Proxy<RemoteClient<W, C, S>>> clients = Collections.synchronizedCollection(new ArrayList<>());
     private SerialCloner cloner;
 
-    public Server(ContinuumLaunchPacket launchPacket, int port, S specializedServer) {
-        this.launchPacket = launchPacket;
+    public Server(int port, S gameServer) {
         this.port = port;
-        this.specializedServer = specializedServer;
+        this.gameServer = gameServer;
     }
 
     @Override
@@ -46,7 +42,7 @@ public class Server<W extends World<W, C>, C, S extends SpecializedServer> imple
         // set up the network
         network = new BasicLocalNode(port);
         // set up serializers
-        specializedServer.initializeSerialization(network);
+        gameServer.initializeSerialization(network);
         // set up serial cloner
         cloner = new SerialCloner(network.getSerializer());
         // when a node joins, send them the server proxy
@@ -62,6 +58,19 @@ public class Server<W extends World<W, C>, C, S extends SpecializedServer> imple
             clients.removeIf(proxy -> proxy.getSource().equals(node.getAddress()));
             synchronized (continuum) {
                 provideInput(continuum.get().handleLeave(node.getAddress()));
+            }
+        });
+        // set up the continuum and time
+        continuum = new WorldContinuum<W, C>();
+        ContinuumLaunchPacket<W, C> launchPacket = gameServer.getStarterPacket();
+        continuum.launch(launchPacket);
+        time = launchPacket.getAdvanceToTime();
+        // set up the game server
+        gameServer.onStart(() -> {
+            synchronized (clients) {
+                return clients.stream()
+                        .map(proxy -> proxy.blocking().getGameClient())
+                        .collect(Collectors.toList());
             }
         });
         // open the network
@@ -128,7 +137,12 @@ public class Server<W extends World<W, C>, C, S extends SpecializedServer> imple
 
     @Override
     public Proxy<?> makeReceiver(NodeAddress address, Class<? extends WorldInteractor> interactorClass) {
-        return null;
+        return gameServer.makeReceiver(address, interactorClass, network::makeProxy);
+    }
+
+    @Override
+    public Proxy<S> getGameServer() {
+        return network.makeProxy(gameServer, gameServer.getRemoteInterface());
     }
 
     public void provideInput(WorldInput<W, C> input) {

@@ -13,11 +13,11 @@ import com.phoenixkahlo.resourcegame.util.ProxyFactory;
  */
 public interface WorldInteractor<W extends World<W, C>, C> extends InputProcessor {
 
-    void onActivate(Proxy<?> receiver);
+    void onActivate(Proxy<?> receiver, C gameClient);
 
     void onDeactivate();
 
-    void render(W world, C specializedClient);
+    void render(W world, C gameClient);
 
     /**
      * After the client updates the world, it will check for
