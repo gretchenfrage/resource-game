@@ -5,6 +5,8 @@ package com.phoenixkahlo.resourcegame.core;
  */
 public interface ServerLoop {
 
+    void init() throws Exception;
+
     void update();
 
     int getTicksPerSecond();

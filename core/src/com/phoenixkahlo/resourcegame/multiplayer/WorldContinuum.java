@@ -1,6 +1,7 @@
 package com.phoenixkahlo.resourcegame.multiplayer;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -79,6 +80,16 @@ public class WorldContinuum<W extends World<W, C>, C> {
 
     public synchronized W get() {
         return world;
+    }
+
+    public synchronized Collection<WorldInput<W, C>> getKnownInputs() {
+        return inputs.values().stream()
+                .flatMap(SortedSet::stream)
+                .collect(Collectors.toList());
+    }
+
+    public synchronized long getEarliestRememberedTime() {
+        return history.firstKey();
     }
 
 }

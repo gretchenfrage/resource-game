@@ -15,6 +15,12 @@ public class ServerLoopRunner implements Runnable {
 
     @Override
     public void run() {
+        try {
+            loop.init();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
         while (true) {
             if (lastRenderTime == -1) {
                 lastRenderTime = System.nanoTime();

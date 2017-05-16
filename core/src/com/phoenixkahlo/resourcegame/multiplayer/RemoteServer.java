@@ -20,4 +20,6 @@ public interface RemoteServer<W extends World<W, C>, C, S> {
      */
     Proxy<?> makeReceiver(NodeAddress address, Class<? extends WorldInteractor> interactorClass);
 
+    void joinWorld(Proxy<RemoteClient<W, C, S>> client);
+
 }

@@ -12,7 +12,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Game state of a client connected to a server. It only needs to be passed the negotiated connection and the
- * specialized client.
+ * specialized client. The network's serializer should already have been set up, in the same configuration as
+ * done by the serializer configurator provided to the server.
  */
 public class ClientState<W extends World<W, C>, C, S> implements GameState, RemoteClient<W, C, S> {
 
@@ -35,7 +36,7 @@ public class ClientState<W extends World<W, C>, C, S> implements GameState, Remo
 
     @Override
     public void onEnter() {
-        // set up userInputBuffer and interactor
+        // set up user input buffer and interactor
         userInputBuffer = new InputBufferer();
         Gdx.input.setInputProcessor(userInputBuffer.processor());
         interactor = continuum.get().getInteractor(network.getAddress());
@@ -58,11 +59,14 @@ public class ClientState<W extends World<W, C>, C, S> implements GameState, Remo
     public void update() {
         // update time
         time++;
-        // apply inputs and then update continuum
         try {
+            // apply world inputs
             while (worldInputBuffer.size() > 0)
                 continuum.applyInput(worldInputBuffer.remove());
+            // update continuum
             continuum.advance(time);
+            // prune continuum
+            continuum.forget(1000);
         } catch (ForgottenHistoryException e) {
             // if the continuum is messed up, just set it up again
             e.printStackTrace();
