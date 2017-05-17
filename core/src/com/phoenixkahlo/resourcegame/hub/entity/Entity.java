@@ -1,9 +1,7 @@
 package com.phoenixkahlo.resourcegame.hub.entity;
 
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.phoenixkahlo.resourcegame.hub.HubWorld;
-import com.phoenixkahlo.resourcegame.hub.RenderStage;
-import com.phoenixkahlo.resourcegame.hub.UpdateStage;
+import com.phoenixkahlo.resourcegame.hub.*;
 import com.phoenixkahlo.resourcegame.multiplayer.ReversibleMutator;
 
 import java.util.UUID;
@@ -18,7 +16,7 @@ public interface Entity {
 
     Stream<ReversibleMutator<HubWorld>> update();
 
-    Stream<Sprite> getSprites();
+    Stream<Sprite> getSprites(LocalHubClient client);
 
     UpdateStage getUpdateStage();
 

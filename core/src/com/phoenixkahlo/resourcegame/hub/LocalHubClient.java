@@ -1,5 +1,7 @@
 package com.phoenixkahlo.resourcegame.hub;
 
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.phoenixkahlo.nodenet.proxy.Proxy;
 
 /**
@@ -7,9 +9,21 @@ import com.phoenixkahlo.nodenet.proxy.Proxy;
  */
 public class LocalHubClient implements HubClient {
 
+    private OrthographicCamera camera;
+    private SpriteBatch batch;
+
     @Override
     public void onStart(Proxy<HubServer> gameServer) {
+        camera = new OrthographicCamera();
+        batch = new SpriteBatch();
+    }
 
+    public OrthographicCamera getCamera() {
+        return camera;
+    }
+
+    public SpriteBatch getBatch() {
+        return batch;
     }
 
     @Override

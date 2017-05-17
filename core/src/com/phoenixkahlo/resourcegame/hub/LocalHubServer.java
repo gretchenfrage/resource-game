@@ -46,7 +46,7 @@ public class LocalHubServer implements HubServer {
 
     @Override
     public ContinuumLaunchPacket<HubWorld, HubClient> getStarterPacket() {
-        return null;
+        //TODO: implement
     }
 
     @Override

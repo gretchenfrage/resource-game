@@ -15,7 +15,7 @@ public interface World<W extends World<W, C>, C> {
      */
     Stream<? extends ReversibleMutator<W>> update();
 
-    WorldInteractor<W, C> getInteractor(NodeAddress client);
+    WorldInteractor<W, C> getInteractor(NodeAddress address, C client);
 
     /**
      * Get the world input that handles the entrance of a client.

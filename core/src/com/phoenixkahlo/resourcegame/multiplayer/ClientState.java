@@ -39,7 +39,7 @@ public class ClientState<W extends World<W, C>, C extends GameClient<W, C, S>, S
         // set up user input buffer and getInteractor
         userInputBuffer = new InputBufferer();
         Gdx.input.setInputProcessor(userInputBuffer.processor());
-        interactor = continuum.get().getInteractor(network.getAddress());
+        interactor = continuum.get().getInteractor(network.getAddress(), gameClient);
         // set up the continuum and time
         setupContinuumAndTime();
         // set up game client
@@ -82,7 +82,7 @@ public class ClientState<W extends World<W, C>, C extends GameClient<W, C, S>, S
             setupContinuumAndTime();
         }
         // handle interactors
-        if (continuum.get().getInteractor(network.getAddress()).equals(interactor)) {
+        if (continuum.get().getInteractor(network.getAddress(), gameClient).equals(interactor)) {
             // if the interactors are unchanged, let it handle user input
             userInputBuffer.flush(interactor);
         } else {
@@ -90,7 +90,7 @@ public class ClientState<W extends World<W, C>, C extends GameClient<W, C, S>, S
             userInputBuffer.clear();
 
             interactor.onDeactivate();
-            interactor = continuum.get().getInteractor(network.getAddress());
+            interactor = continuum.get().getInteractor(network.getAddress(), gameClient);
             Proxy<?> receiver = server.blocking().makeReceiver(network.getAddress(), interactor.getClass());
             interactor.onActivate(receiver, gameClient);
         }

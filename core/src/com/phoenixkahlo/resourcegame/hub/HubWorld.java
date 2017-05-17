@@ -3,7 +3,7 @@ package com.phoenixkahlo.resourcegame.hub;
 import com.phoenixkahlo.nodenet.NodeAddress;
 import com.phoenixkahlo.resourcegame.hub.entity.Avatar;
 import com.phoenixkahlo.resourcegame.hub.entity.Entity;
-import com.phoenixkahlo.resourcegame.hub.entity.PlayerAvatar;
+import com.phoenixkahlo.resourcegame.hub.interactor.AvatarInteractor;
 import com.phoenixkahlo.resourcegame.multiplayer.ReversibleMutator;
 import com.phoenixkahlo.resourcegame.multiplayer.World;
 import com.phoenixkahlo.resourcegame.multiplayer.WorldInput;
@@ -42,8 +42,8 @@ public class HubWorld implements World<HubWorld, HubClient> {
     }
 
     @Override
-    public WorldInteractor<HubWorld, HubClient> getInteractor(NodeAddress client) {
-        return avatars.get(client).getInteractor();
+    public WorldInteractor<HubWorld, HubClient> getInteractor(NodeAddress address, HubClient client) {
+        return new AvatarInteractor(address);
     }
 
     public static ReversibleMutator<HubWorld> addEntity(Entity entity) {
@@ -112,7 +112,7 @@ public class HubWorld implements World<HubWorld, HubClient> {
         return new WorldInput<HubWorld, HubClient>(time) {
             @Override
             public Stream<? extends ReversibleMutator> toMutators() {
-                return Stream.of(setAvatar(client, new PlayerAvatar()));
+                return Stream.of(setAvatar(client, new Avatar()));
             }
         };
     }
@@ -125,6 +125,14 @@ public class HubWorld implements World<HubWorld, HubClient> {
                 return Stream.of(removeAvatar(client));
             }
         };
+    }
+
+    public Entity getEntity(UUID id) {
+        return entities.get(id);
+    }
+
+    public Avatar getAvatar(NodeAddress client) {
+        return avatars.get(client);
     }
 
 }
