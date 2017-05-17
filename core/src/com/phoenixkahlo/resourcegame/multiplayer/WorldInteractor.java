@@ -2,7 +2,6 @@ package com.phoenixkahlo.resourcegame.multiplayer;
 
 import com.badlogic.gdx.InputProcessor;
 import com.phoenixkahlo.nodenet.proxy.Proxy;
-import com.phoenixkahlo.resourcegame.util.ProxyFactory;
 
 /**
  * An object that, when activated on a client's machine, handles the
@@ -17,7 +16,7 @@ public interface WorldInteractor<W extends World<W, C>, C> extends InputProcesso
 
     void onDeactivate();
 
-    void render(W world, C gameClient);
+    void render(W world, long time);
 
     /**
      * After the client updates the world, it will check for

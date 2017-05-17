@@ -39,7 +39,8 @@ public class WorldContinuum<W extends World<W, C>, C> {
         while (targetTime > time) {
             Stack<ReversibleMutator<W>> stack = new Stack<>();
             Stream.concat(
-                    inputs.getOrDefault(time, new TreeSet<>()).stream().flatMap(WorldInput::toMutators),
+                    inputs.getOrDefault(time, new TreeSet<>()).stream()
+                            .flatMap(input -> input.toMutators(world)),
                     world.update()
             ).forEach(mutator -> {
                 mutator.apply(world);

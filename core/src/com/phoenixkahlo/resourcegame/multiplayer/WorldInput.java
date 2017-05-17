@@ -28,6 +28,6 @@ public abstract class WorldInput<W extends World<W, C>, C> {
         return id;
     }
 
-    public abstract Stream<? extends ReversibleMutator<W>> toMutators();
+    public abstract Stream<? extends ReversibleMutator<W>> toMutators(W world);
 
 }

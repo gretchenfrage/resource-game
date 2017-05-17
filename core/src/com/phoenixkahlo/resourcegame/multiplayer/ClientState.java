@@ -100,7 +100,7 @@ public class ClientState<W extends World<W, C>, C extends GameClient<W, C, S>, S
 
     @Override
     public void render() {
-        interactor.render(continuum.get(), gameClient);
+        interactor.render(continuum.get(), time);
     }
 
     /**

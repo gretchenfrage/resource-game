@@ -7,6 +7,4 @@ import com.phoenixkahlo.resourcegame.multiplayer.GameClient;
  */
 public interface HubClient extends GameClient<HubWorld, HubClient, HubServer> {
 
-
-
 }

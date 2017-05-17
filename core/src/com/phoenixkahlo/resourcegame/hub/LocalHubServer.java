@@ -7,10 +7,13 @@ import com.phoenixkahlo.resourcegame.hub.interactor.AvatarInteractor;
 import com.phoenixkahlo.resourcegame.hub.interactor.AvatarInteractorReceiver;
 import com.phoenixkahlo.resourcegame.hub.interactor.LocalAvatarInteractorReceiver;
 import com.phoenixkahlo.resourcegame.multiplayer.ContinuumLaunchPacket;
+import com.phoenixkahlo.resourcegame.multiplayer.WorldInput;
 import com.phoenixkahlo.resourcegame.multiplayer.WorldInteractor;
 import com.phoenixkahlo.resourcegame.util.ProxyFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -20,7 +23,7 @@ public class LocalHubServer implements HubServer {
 
     @Override
     public void onStart(Supplier<Collection<Proxy<HubClient>>> gameClients) {
-
+        System.out.println("starting hub server");
     }
 
     @Override
@@ -34,9 +37,11 @@ public class LocalHubServer implements HubServer {
     }
 
     @Override
-    public Proxy<?> makeReceiver(NodeAddress client, Class<? extends WorldInteractor> interactorClass, ProxyFactory factory) {
+    public Proxy<?> makeReceiver(NodeAddress client, Class<? extends WorldInteractor> interactorClass,
+                                 ProxyFactory factory, Consumer<WorldInput<HubWorld, HubClient>> inputter) {
         if (interactorClass.equals(AvatarInteractor.class))
-            return factory.apply(new LocalAvatarInteractorReceiver(client), AvatarInteractorReceiver.class);
+            return factory.apply(new LocalAvatarInteractorReceiver(client, inputter), AvatarInteractorReceiver.class);
+        throw new IllegalArgumentException();
     }
 
     @Override
@@ -46,7 +51,12 @@ public class LocalHubServer implements HubServer {
 
     @Override
     public ContinuumLaunchPacket<HubWorld, HubClient> getStarterPacket() {
-        //TODO: implement
+        return new ContinuumLaunchPacket<>(
+                new HubWorld(),
+                new ArrayList<>(0),
+                0,
+                0
+        );
     }
 
     @Override

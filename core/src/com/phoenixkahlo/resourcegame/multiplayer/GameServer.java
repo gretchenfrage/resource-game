@@ -6,6 +6,7 @@ import com.phoenixkahlo.nodenet.proxy.Proxy;
 import com.phoenixkahlo.resourcegame.util.ProxyFactory;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -19,7 +20,8 @@ public interface GameServer<W extends World<W, C>, C, S> {
 
     void onEnd();
 
-    Proxy<?> makeReceiver(NodeAddress client, Class<? extends WorldInteractor> interactorClass, ProxyFactory factory);
+    Proxy<?> makeReceiver(NodeAddress client, Class<? extends WorldInteractor> interactorClass, ProxyFactory factory,
+                          Consumer<WorldInput<W, C>> inputProvider);
 
     void initializeSerialization(LocalNode network);
 

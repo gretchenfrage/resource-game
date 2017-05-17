@@ -137,7 +137,7 @@ public class Server<W extends World<W, C>, C, S extends GameServer<W, C, S>> imp
 
     @Override
     public Proxy<?> makeReceiver(NodeAddress address, Class<? extends WorldInteractor> interactorClass) {
-        return gameServer.makeReceiver(address, interactorClass, network::makeProxy);
+        return gameServer.makeReceiver(address, interactorClass, network::makeProxy, this::provideInput);
     }
 
     @Override

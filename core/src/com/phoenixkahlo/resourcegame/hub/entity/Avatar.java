@@ -16,7 +16,7 @@ public class Avatar extends AbstractEntity {
     private Vector2 position;
     private Vector2 velocity;
 
-    private transient Sprite spriteCache = null;
+    private transient Sprite sprite = null; // lazy evaluated cache
 
     public Avatar() {
         position = new Vector2(0, 0);
@@ -54,14 +54,19 @@ public class Avatar extends AbstractEntity {
     @Override
     public Stream<ReversibleMutator<HubWorld>> update() {
         return Stream.of(
-                setPosition(getPosition().add(getVelocity()))
+                setPosition(getPosition().add(getVelocity())) // update position
         );
     }
 
     @Override
     public Stream<Sprite> getSprites(LocalHubClient client) {
-
-
+        if (sprite == null) {
+            sprite = new Sprite(client.getTextures().get(HubTexture.WHEAT));
+            sprite.setSize(1, 1);
+            sprite.setOriginCenter();
+        }
+        sprite.setCenter(position.x, position.y);
+        return Stream.of(sprite);
     }
 
 }

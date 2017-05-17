@@ -1,5 +1,6 @@
 package com.phoenixkahlo.resourcegame.hub;
 
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.phoenixkahlo.nodenet.NodeAddress;
 import com.phoenixkahlo.resourcegame.hub.entity.Avatar;
 import com.phoenixkahlo.resourcegame.hub.entity.Entity;
@@ -46,7 +47,7 @@ public class HubWorld implements World<HubWorld, HubClient> {
         return new AvatarInteractor(address);
     }
 
-    public static ReversibleMutator<HubWorld> addEntity(Entity entity) {
+    public ReversibleMutator<HubWorld> addEntity(Entity entity) {
         return new MultipleReversible<HubWorld>(
                 new MapPut<HubWorld, UUID, Entity>( // add to the entity collection
                         world -> world.entities,
@@ -66,7 +67,7 @@ public class HubWorld implements World<HubWorld, HubClient> {
         );
     }
 
-    public static ReversibleMutator<HubWorld> removeEntity(Entity entity) {
+    public ReversibleMutator<HubWorld> removeEntity(Entity entity) {
         return new MultipleReversible<HubWorld>(
                 new MapRemove<HubWorld, UUID, Entity>( // remove from the entity collection
                         world -> world.entities,
@@ -83,7 +84,7 @@ public class HubWorld implements World<HubWorld, HubClient> {
         );
     }
 
-    public static ReversibleMutator<HubWorld> setAvatar(NodeAddress address, Avatar entity) {
+    public ReversibleMutator<HubWorld> setAvatar(NodeAddress address, Avatar entity) {
         return new MultipleReversible<HubWorld>(
                 addEntity(entity), // add the entity
                 new MapPut<HubWorld, NodeAddress, Avatar>( // add to the avatars map
@@ -94,7 +95,7 @@ public class HubWorld implements World<HubWorld, HubClient> {
         );
     }
 
-    public static ReversibleMutator<HubWorld> removeAvatar(NodeAddress address) {
+    public ReversibleMutator<HubWorld> removeAvatar(NodeAddress address) {
         return new SituationalReversible<HubWorld>(
                 world -> world.avatars.containsKey(address), // if there is an avatar with that address
                 world -> new MultipleReversible<HubWorld>(
@@ -111,7 +112,7 @@ public class HubWorld implements World<HubWorld, HubClient> {
     public WorldInput<HubWorld, HubClient> handleEnter(NodeAddress client, long time) {
         return new WorldInput<HubWorld, HubClient>(time) {
             @Override
-            public Stream<? extends ReversibleMutator> toMutators() {
+            public Stream<? extends ReversibleMutator> toMutators(HubWorld world) {
                 return Stream.of(setAvatar(client, new Avatar()));
             }
         };
@@ -121,7 +122,7 @@ public class HubWorld implements World<HubWorld, HubClient> {
     public WorldInput<HubWorld, HubClient> handleLeave(NodeAddress client, long time) {
         return new WorldInput<HubWorld, HubClient>(time) {
             @Override
-            public Stream<? extends ReversibleMutator<HubWorld>> toMutators() {
+            public Stream<? extends ReversibleMutator<HubWorld>> toMutators(HubWorld world) {
                 return Stream.of(removeAvatar(client));
             }
         };
@@ -133,6 +134,12 @@ public class HubWorld implements World<HubWorld, HubClient> {
 
     public Avatar getAvatar(NodeAddress client) {
         return avatars.get(client);
+    }
+
+    public Stream<Sprite> getSprites(LocalHubClient client) {
+        return renderTree.values().stream()
+                .flatMap(bin -> bin.values().stream())
+                .flatMap(entity -> entity.getSprites(client));
     }
 
 }
