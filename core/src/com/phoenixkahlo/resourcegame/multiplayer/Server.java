@@ -1,5 +1,6 @@
 package com.phoenixkahlo.resourcegame.multiplayer;
 
+import com.esotericsoftware.kryo.Kryo;
 import com.phoenixkahlo.nodenet.BasicLocalNode;
 import com.phoenixkahlo.nodenet.DisconnectionException;
 import com.phoenixkahlo.nodenet.LocalNode;
@@ -30,7 +31,6 @@ public class Server<W extends World<W, C>, C, S extends GameServer<W, C, S>> imp
     private volatile long time;
     private BlockingQueue<WorldInput<W, C>> worldInputBuffer = new LinkedBlockingQueue<>();
     private Collection<Proxy<RemoteClient<W, C, S>>> clients = Collections.synchronizedCollection(new ArrayList<>());
-    private SerialCloner cloner;
 
     public Server(int port, S gameServer) {
         this.port = port;
@@ -41,10 +41,6 @@ public class Server<W extends World<W, C>, C, S extends GameServer<W, C, S>> imp
     public void init() throws SocketException {
         // set up the network
         network = new BasicLocalNode(port);
-        // set up serializers
-        gameServer.initializeSerialization(network);
-        // set up serial cloner
-        cloner = new SerialCloner(network.getSerializer());
         // when a node joins, send them the server proxy
         network.listenForJoin(node -> {
             try {
@@ -122,7 +118,7 @@ public class Server<W extends World<W, C>, C, S extends GameServer<W, C, S>> imp
     public ContinuumLaunchPacket<W, C> getLaunchPacket() {
         synchronized (continuum) {
             return new ContinuumLaunchPacket<>(
-                    cloner.clone(continuum.get()),
+                    network.getKryo().copy(continuum.get()),
                     continuum.getKnownInputs(),
                     continuum.getEarliestRememberedTime(),
                     time

@@ -1,6 +1,5 @@
 package com.phoenixkahlo.resourcegame.hub;
 
-import com.phoenixkahlo.nodenet.LocalNode;
 import com.phoenixkahlo.nodenet.NodeAddress;
 import com.phoenixkahlo.nodenet.proxy.Proxy;
 import com.phoenixkahlo.resourcegame.hub.interactor.AvatarInteractor;
@@ -42,11 +41,6 @@ public class LocalHubServer implements HubServer {
         if (interactorClass.equals(AvatarInteractor.class))
             return factory.apply(new LocalAvatarInteractorReceiver(client, inputter), AvatarInteractorReceiver.class);
         throw new IllegalArgumentException();
-    }
-
-    @Override
-    public void initializeSerialization(LocalNode network) {
-        //TODO: implement
     }
 
     @Override

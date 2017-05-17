@@ -23,8 +23,6 @@ public interface GameServer<W extends World<W, C>, C, S> {
     Proxy<?> makeReceiver(NodeAddress client, Class<? extends WorldInteractor> interactorClass, ProxyFactory factory,
                           Consumer<WorldInput<W, C>> inputProvider);
 
-    void initializeSerialization(LocalNode network);
-
     ContinuumLaunchPacket<W, C> getStarterPacket();
 
     Class<S> getRemoteInterface();
